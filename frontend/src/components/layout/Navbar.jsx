@@ -1,200 +1,131 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
-  Avatar,
-  Container,
-} from '@mui/material'
-import {
-  Menu as MenuIcon,
-  Create,
-  Person,
-  BookmarkBorder,
-  Logout,
-} from '@mui/icons-material'
-import { useAuth } from '../../context/AuthContext'
-import { useTheme } from '../../context/ThemeContext'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+  Search, 
+  Bell, 
+  User, 
+  LogOut,
+  Settings,
+  BookMarked
+} from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { Menu, Transition } from '@headlessui/react';
 
 const Navbar = () => {
-  const [anchorEl, setAnchorEl] = useState(null)
-  const { user, logout, isAuthenticated } = useAuth()
-  const navigate = useNavigate()
-  const { theme } = useTheme()
-
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleLogout = () => {
-    logout()
-    handleClose()
-    navigate('/')
-  }
+    logout();
+    navigate('/');
+  };
 
   return (
-    <AppBar 
-      position="sticky" 
-      sx={{ 
-        backgroundColor: 'white',
-        color: theme.palette.text.primary,
-        boxShadow: '0 2px 20px 0 rgba(0, 0, 0, 0.1)',
-        borderBottom: `1px solid rgba(233, 30, 99, 0.1)`,
-      }}
-    >
-      <Container maxWidth="lg">
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
-          {/* Logo */}
-          <Typography
-            variant="h4"
-            component={Link}
-            to="/"
-            sx={{
-              textDecoration: 'none',
-              background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              color: 'transparent',
-              fontWeight: 700,
-              display: { xs: 'none', sm: 'block' },
-            }}
+    <nav className="bg-white/70 backdrop-blur-lg border-b border-white/20 px-6 py-4">
+      <div className="flex items-center justify-between">
+        {/* Search Bar */}
+        <div className="flex-1 max-w-2xl">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Search stories, authors, or genres..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-white/50 border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent backdrop-blur-sm"
+            />
+          </div>
+        </div>
+
+        {/* Right Side */}
+        <div className="flex items-center space-x-4">
+          {/* Notifications */}
+          <Link 
+            to="/notifications"
+            className="relative p-2 text-gray-600 hover:text-pink-600 transition-colors duration-200"
           >
-            StorySphere
-          </Typography>
+            <Bell className="w-6 h-6" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-pink-500 text-white text-xs rounded-full flex items-center justify-center">
+              3
+            </span>
+          </Link>
 
-          {/* Mobile Menu */}
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ display: { sm: 'none' } }}
+          {/* Library */}
+          <Link 
+            to="/library"
+            className="p-2 text-gray-600 hover:text-pink-600 transition-colors duration-200"
           >
-            <MenuIcon />
-          </IconButton>
+            <BookMarked className="w-6 h-6" />
+          </Link>
 
-          {/* Navigation Links */}
-          <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 2 }}>
-            <Button 
-              color="inherit" 
-              component={Link} 
-              to="/"
-              sx={{
-                fontWeight: 600,
-                '&:hover': {
-                  color: theme.palette.primary.main,
-                },
-              }}
+          {/* User Menu */}
+          <Menu as="div" className="relative">
+            <Menu.Button className="flex items-center space-x-3 p-2 rounded-2xl hover:bg-white/50 transition-all duration-200">
+              <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                {user?.username?.charAt(0).toUpperCase()}
+              </div>
+              <span className="font-medium text-gray-700 hidden sm:block">
+                {user?.username}
+              </span>
+            </Menu.Button>
+
+            <Transition
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-1 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-1 scale-100"
+              leaveTo="transform opacity-0 scale-95"
             >
-              Discover
-            </Button>
-            <Button 
-              color="inherit" 
-              component={Link} 
-              to="/library"
-              sx={{
-                fontWeight: 600,
-                '&:hover': {
-                  color: theme.palette.primary.main,
-                },
-              }}
-            >
-              My Library
-            </Button>
-          </Box>
+              <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 py-2 z-50">
+                <Menu.Item>
+                  {({ active }) => (
+                    <Link
+                      to="/profile"
+                      className={`flex items-center px-4 py-3 text-sm ${
+                        active ? 'bg-pink-50 text-pink-600' : 'text-gray-700'
+                      }`}
+                    >
+                      <User className="w-4 h-4 mr-3" />
+                      Your Profile
+                    </Link>
+                  )}
+                </Menu.Item>
+                <Menu.Item>
+                  {({ active }) => (
+                    <Link
+                      to="/settings"
+                      className={`flex items-center px-4 py-3 text-sm ${
+                        active ? 'bg-pink-50 text-pink-600' : 'text-gray-700'
+                      }`}
+                    >
+                      <Settings className="w-4 h-4 mr-3" />
+                      Settings
+                    </Link>
+                  )}
+                </Menu.Item>
+                <div className="border-t border-gray-200 my-1"></div>
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={handleLogout}
+                      className={`flex items-center w-full px-4 py-3 text-sm ${
+                        active ? 'bg-pink-50 text-pink-600' : 'text-gray-700'
+                      }`}
+                    >
+                      <LogOut className="w-4 h-4 mr-3" />
+                      Sign Out
+                    </button>
+                  )}
+                </Menu.Item>
+              </Menu.Items>
+            </Transition>
+          </Menu>
+        </div>
+      </div>
+    </nav>
+  );
+};
 
-          {/* Auth Section */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {isAuthenticated ? (
-              <>
-                <Button
-                  variant="contained"
-                  startIcon={<Create />}
-                  component={Link}
-                  to="/create-story"
-                  sx={{
-                    borderRadius: '20px',
-                    textTransform: 'none',
-                    fontWeight: 600,
-                  }}
-                >
-                  Write Story
-                </Button>
-                
-                <IconButton onClick={handleMenu}>
-                  <Avatar 
-                    sx={{ 
-                      width: 40, 
-                      height: 40,
-                      backgroundColor: theme.palette.primary.main,
-                    }}
-                  >
-                    {user?.username?.charAt(0).toUpperCase()}
-                  </Avatar>
-                </IconButton>
-
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleClose}
-                >
-                  <MenuItem onClick={() => { handleClose(); navigate('/profile'); }}>
-                    <Person sx={{ mr: 1 }} />
-                    Profile
-                  </MenuItem>
-                  <MenuItem onClick={() => { handleClose(); navigate('/library'); }}>
-                    <BookmarkBorder sx={{ mr: 1 }} />
-                    My Library
-                  </MenuItem>
-                  <MenuItem onClick={handleLogout}>
-                    <Logout sx={{ mr: 1 }} />
-                    Logout
-                  </MenuItem>
-                </Menu>
-              </>
-            ) : (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button 
-                  color="inherit" 
-                  component={Link} 
-                  to="/login"
-                  sx={{
-                    fontWeight: 600,
-                    '&:hover': {
-                      color: theme.palette.primary.main,
-                    },
-                  }}
-                >
-                  Login
-                </Button>
-                <Button 
-                  variant="contained" 
-                  component={Link} 
-                  to="/register"
-                  sx={{
-                    borderRadius: '20px',
-                    textTransform: 'none',
-                    fontWeight: 600,
-                  }}
-                >
-                  Sign Up
-                </Button>
-              </Box>
-            )}
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
-  )
-}
-
-export default Navbar
+export default Navbar;

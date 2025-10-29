@@ -1,115 +1,85 @@
-import React from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  ListItemButton,
-  Box,
-  Typography,
-} from '@mui/material'
-import {
-  Home,
-  Explore,
-  BookmarkBorder,
-  Notifications,
-  Person,
-  Create,
-} from '@mui/icons-material'
-import { useTheme } from '@mui/material/styles'
-import { useAuth } from '../../context/AuthContext'
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  BookOpen, 
+  PenSquare, 
+  Users,
+  TrendingUp,
+  Sparkles
+} from 'lucide-react';
 
-const Sidebar = ({ open, onClose }) => {
-  const theme = useTheme()
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { user } = useAuth()
+const Sidebar = () => {
+  const location = useLocation();
 
-  const menuItems = [
-    { text: 'Home', icon: <Home />, path: '/' },
-    { text: 'Discover', icon: <Explore />, path: '/discover' },
-    { text: 'My Library', icon: <BookmarkBorder />, path: '/library' },
-    { text: 'Notifications', icon: <Notifications />, path: '/notifications' },
-    { text: 'Profile', icon: <Person />, path: '/profile' },
-    { text: 'Write Story', icon: <Create />, path: '/create-story' },
-  ]
 
-  const handleNavigation = (path) => {
-    navigate(path)
-    onClose()
-  }
+const navigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Stories', href: '/stories', icon: BookOpen },
+  { name: 'Create Story', href: '/create-story', icon: PenSquare },
+  { name: 'Community', href: '/community', icon: Users },
+  { name: 'Trending', href: '/trending', icon: TrendingUp },
+];
+
+  const isActive = (path) => location.pathname === path;
 
   return (
-    <Drawer
-      anchor="left"
-      open={open}
-      onClose={onClose}
-      sx={{
-        '& .MuiDrawer-paper': {
-          width: 280,
-          boxSizing: 'border-box',
-          backgroundColor: theme.palette.background.paper,
-        },
-      }}
-    >
-      <Box sx={{ p: 2 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-            fontWeight: 700,
-            mb: 2,
-          }}
-        >
-          StorySphere
-        </Typography>
-        
-        {user && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Welcome, {user.username}!
-          </Typography>
-        )}
-      </Box>
+    <div className="w-64 bg-white/70 backdrop-blur-lg border-r border-white/20 h-full">
+      {/* Logo */}
+      <div className="p-6 border-b border-white/20">
+        <Link to="/dashboard" className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl flex items-center justify-center">
+            <BookOpen className="w-6 h-6 text-white" />
+          </div>
+          <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+            StorySphere
+          </span>
+        </Link>
+      </div>
 
-      <List>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => handleNavigation(item.path)}
-              sx={{
-                borderRadius: '8px',
-                mx: 1,
-                mb: 0.5,
-                '&.Mui-selected': {
-                  backgroundColor: theme.palette.primary.light + '20',
-                  color: theme.palette.primary.main,
-                  '&:hover': {
-                    backgroundColor: theme.palette.primary.light + '30',
-                  },
-                },
-              }}
+      {/* Navigation */}
+      <nav className="p-4 space-y-2">
+        {navigation.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
+          
+          return (
+            <Link
+              key={item.name}
+              to={item.href}
+              className={`flex items-center space-x-3 px-4 py-3 rounded-2xl transition-all duration-200 group ${
+                active
+                  ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg'
+                  : 'text-gray-600 hover:bg-white/50 hover:text-pink-600'
+              }`}
             >
-              <ListItemIcon
-                sx={{
-                  color: location.pathname === item.path ? 
-                    theme.palette.primary.main : 'inherit',
-                }}
-              >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Drawer>
-  )
-}
+              <Icon className={`w-5 h-5 ${
+                active ? 'text-white' : 'text-gray-400 group-hover:text-pink-500'
+              }`} />
+              <span className="font-medium">{item.name}</span>
+              {item.name === 'Create Story' && (
+                <Sparkles className="w-4 h-4 ml-auto text-yellow-500" />
+              )}
+            </Link>
+          );
+        })}
+      </nav>
 
-export default Sidebar
+      {/* Quick Stats */}
+      <div className="p-4 mt-8">
+        <div className="bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl p-6 text-white">
+          <h3 className="font-semibold text-sm opacity-90 mb-2">Writing Streak</h3>
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="text-2xl font-bold">7 days</div>
+              <div className="text-sm opacity-90">Keep going!</div>
+            </div>
+            <div className="text-3xl">🔥</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Sidebar;
